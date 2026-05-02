@@ -32,10 +32,12 @@ const styles = `
 }
 
 .irr-app {
+ max-width: 100vw;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
   font-family: "Segoe UI", sans-serif;
+   overflow-x: hidden;
 }
 
 /* HEADER */
@@ -89,7 +91,7 @@ const styles = `
 /* STATS */
 .irr-stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 15px;
   padding: 20px;
 }
@@ -130,7 +132,7 @@ const styles = `
 /* ZONES */
 .irr-zone-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 15px;
   padding: 20px;
 }
