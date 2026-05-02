@@ -226,6 +226,25 @@ const styles = `
   border-radius: 10px;
   flex-shrink: 0; /* 🔥 prevents stretching */
 }
+  .irr-btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.irr-btn.on {
+  background: rgba(74, 222, 128, 0.2);
+  color: #4ade80;
+}
+
+.irr-btn.off {
+  background: rgba(248, 113, 113, 0.2);
+  color: #f87171;
+}
 `;
  
 // ─── Chart options ────────────────────────────────────────────────────────────
@@ -272,7 +291,9 @@ export default function Dashboard({ setIsAuth }) {
   const [alerts, setAlerts]       = useState([]);
   const [historyRecords, setHistoryRecords] = useState([]);
   const [histFilter, setHistFilter]         = useState("all");
+  const [loadingZone, setLoadingZone] = useState(null);
   const [historyData, setHistoryData] = useState({ time: [], moisture: [], temperature: []
+    
   
    });
    
@@ -684,6 +705,43 @@ useEffect(() => {
                       style={{ width: `${m}%` }}
                     />
                   </div>
+                  <div style={{ display: "flex", gap: "10px", marginTop: "12px" }}>
+  
+  <div style={{ display: "flex", gap: "10px", marginTop: "12px" }}>
+
+  <button
+    className="irr-btn on"
+    disabled={loadingZone === z.zone}
+    onClick={async () => {
+      setLoadingZone(z.zone);
+      await API.post("/irrigation", {
+        zone: z.zone,
+        status: "MANUAL ON",
+      });
+      setLoadingZone(null);
+    }}
+  >
+    {loadingZone === z.zone ? "..." : "ON"}
+  </button>
+
+  <button
+    className="irr-btn off"
+    disabled={loadingZone === z.zone}
+    onClick={async () => {
+      setLoadingZone(z.zone);
+      await API.post("/irrigation", {
+        zone: z.zone,
+        status: "MANUAL OFF",
+      });
+      setLoadingZone(null);
+    }}
+  >
+    {loadingZone === z.zone ? "..." : "OFF"}
+  </button>
+
+</div>
+
+</div>
                 </div>
               );
             })}
