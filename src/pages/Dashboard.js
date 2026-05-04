@@ -885,7 +885,14 @@ useEffect(() => {
       {filteredHistory.length === 0 ? (
         <tr>
           <td colSpan={5} className="irr-empty-hist">
-            No irrigation records yet
+            {data.map((item) => (
+  <tr key={item.id}>
+    <td>{item.zone}</td>
+    <td>{item.status}</td>
+    <td>{item.reason}</td>
+    <td>{new Date(item.created_at).toLocaleString()}</td>
+  </tr>
+))}
           </td>
         </tr>
       ) : (

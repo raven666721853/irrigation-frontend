@@ -4,6 +4,13 @@ import API from "../services/api";
 export default function History() {
   const [history, setHistory] = useState([]);
 
+  
+  useEffect(() => {
+  API.get("/history")
+    .then(res => setData(res.data))
+    .catch(err => console.log(err));
+}, []);
+
   useEffect(() => {
     API.get("/api/history")
       .then(res => setHistory(res.data))
