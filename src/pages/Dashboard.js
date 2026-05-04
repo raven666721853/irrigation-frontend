@@ -463,11 +463,13 @@ useEffect(() => {
   const dryZones     = zones.filter((z) => z.moisture <  40).length;
  
   // ── Filtered history ──────────────────────────────────────────────────────
-  const filteredHistory =
+ const filteredHistory =
   histFilter === "all"
     ? historyRecords
     : historyRecords.filter((r) =>
-        r.status.toLowerCase().includes(histFilter.toLowerCase())
+        histFilter === "manual"
+          ? r.reason === "MANUAL"
+          : r.reason === "AUTO"
       );
  
   // ── Chart data ────────────────────────────────────────────────────────────
@@ -881,64 +883,52 @@ useEffect(() => {
       </tr>
     </thead>
 
-    <tbody>
-      {filteredHistory.length === 0 ? (
-        <tr>
-          <td colSpan={5} className="irr-empty-hist">
-            {data.map((item) => (
-  <tr key={item.id}>
-    <td>{item.zone}</td>
-    <td>{item.status}</td>
-    <td>{item.reason}</td>
-    <td>{new Date(item.created_at).toLocaleString()}</td>
-  </tr>
-))}
-          </td>
-        </tr>
-      ) : (
-        filteredHistory.map((r, i) => (
-          <tr key={r.id || i}>
+   <tbody>
+  {filteredHistory.length === 0 ? (
+    <tr>
+      <td colSpan={5} className="irr-empty-hist">
+        No irrigation records yet
+      </td>
+    </tr>
+  ) : (
+    filteredHistory.map((r, i) => (
+      <tr key={r.id || i}>
 
-            {/* # */}
-            <td>{i + 1}</td>
+        {/* # */}
+        <td>{i + 1}</td>
 
-            {/* Zone */}
-            <td>Zone {r.zone}</td>
+        {/* Zone */}
+        <td>Zone {r.zone}</td>
 
-            {/* Status */}
-            <td>
-              <span
-                className={`irr-status-badge ${
-                  String(r.status).includes("SMART")
-                    ? "irr-badge-auto"
-                    : "irr-badge-manual"
-                }`}
-              >
-                {r.status}
-              </span>
-            </td>
+        {/* Status */}
+        <td>
+          <span
+            className={`irr-status-badge ${
+              r.reason === "AUTO"
+                ? "irr-badge-auto"
+                : "irr-badge-manual"
+            }`}
+          >
+            {r.status}
+          </span>
+        </td>
 
-            {/* Time */}
-            <td>
-              {r.created_at
-                ? new Date(r.created_at).toLocaleString()
-                : "—"}
-            </td>
+        {/* Time */}
+        <td>
+          {r.created_at
+            ? new Date(r.created_at).toLocaleString()
+            : "—"}
+        </td>
 
-            {/* Reason (formatted) */}
-            <td style={{ fontSize: "12px", color: "var(--muted)" }}>
-              {r.reason
-                ? r.reason
-                    .trim()
-                    .split("\n")
-                    .map((line, idx) => <div key={idx}>{line}</div>)
-                : "-"}
-            </td>
+        {/* Reason */}
+        <td style={{ fontSize: "12px", color: "var(--muted)" }}>
+          {r.reason || "-"}
+        </td>
 
-          </tr>
-        ))
-      )}
-    </tbody>
+      </tr>
+    ))
+  )}
+</tbody>
 
   </table>
 </div>
