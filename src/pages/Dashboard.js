@@ -296,6 +296,10 @@ export default function Dashboard({ setIsAuth }) {
     
   
    });
+    const [waterStats, setWaterStats] = useState({
+  today: 0,
+  weekly: []
+});
    
    const [weatherHistory, setWeatherHistory] = useState({
   time: [],
@@ -327,6 +331,7 @@ export default function Dashboard({ setIsAuth }) {
 
     return next.toLocaleString();
   };
+ 
 
 
 
@@ -379,9 +384,48 @@ useEffect(() => {
         .catch(console.error);
     };
  
-    fetchZones();
-    const interval = setInterval(fetchZones, 3000);
-    return () => clearInterval(interval);
+    useEffect(() => {
+  const eventSource = new EventSource(
+    "https://smart-irrigation-backend-wra6.onrender.com/api/stream"
+  );
+
+  eventSource.onmessage = (event) => {
+    const raw = JSON.parse(event.data);
+
+    const clean = raw.map((z) => ({
+      zone: Number(z.zone),
+      moisture: Number(z.moisture),
+      temperature: Number(z.temperature || 0),
+    }));
+
+    // ✅ update zones (same as before)
+    setZones(clean);
+
+    // ✅ KEEP YOUR CHART LOGIC
+    const avgM =
+      clean.reduce((s, z) => s + z.moisture, 0) / clean.length;
+
+    const avgT =
+      clean.reduce((s, z) => s + z.temperature, 0) / clean.length;
+
+    const now = new Date().toLocaleTimeString();
+
+    setHistoryData((prev) => ({
+      time: [...prev.time.slice(-10), now],
+      moisture: [...prev.moisture.slice(-10), avgM],
+      temperature: [...prev.temperature.slice(-10), avgT],
+    }));
+  };
+
+  eventSource.onerror = (err) => {
+    console.error("SSE error:", err);
+    eventSource.close();
+  };
+
+  return () => {
+    eventSource.close();
+  };
+}, []);
   }, []);
  
   // ── Fetch alerts ─────────────────────────────────────────────────────────
@@ -407,6 +451,18 @@ useEffect(() => {
     const interval = setInterval(fetchHistory, 5000);
     return () => clearInterval(interval);
   }, []);
+  useEffect(() => {
+  const fetchWater = () => {
+    API.get("/water-stats")
+      .then(res => setWaterStats(res.data))
+      .catch(console.error);
+  };
+
+  fetchWater();
+  const interval = setInterval(fetchWater, 10000);
+
+  return () => clearInterval(interval);
+}, []);
 
 
  useEffect(() => {
@@ -656,6 +712,13 @@ useEffect(() => {
               <div className="irr-stat-value irr-val-red">{dryZones}</div>
               <div className="irr-stat-change">need irrigation</div>
             </div>
+            <div className="irr-stat-card">
+  <div className="irr-stat-label">Water Usage Today</div>
+  <div className="irr-stat-value">
+    {waterStats.today.toFixed(2)} L
+  </div>
+  <div className="irr-stat-change">live consumption</div>
+</div>
           </div>
  
           {/* Chart */}
@@ -675,6 +738,27 @@ useEffect(() => {
             </div>
             <Line data={chartData} options={chartOptions} />
           </div>
+          <div className="irr-chart-card">
+  <div className="irr-card-title">💧 Weekly Water Usage</div>
+
+  <Line
+    data={{
+      labels: waterStats.weekly.map(w =>
+        new Date(w.day).toLocaleDateString()
+      ),
+      datasets: [
+        {
+          label: "Liters",
+          data: waterStats.weekly.map(w => w.liters),
+          borderColor: "#4ade80",
+          backgroundColor: "rgba(74,222,128,0.1)",
+          tension: 0.4,
+        },
+      ],
+    }}
+    options={chartOptions}
+  />
+</div>
  
           {/* Zone cards */}
           <div className="irr-zone-grid">
@@ -879,6 +963,7 @@ useEffect(() => {
         <th>Zone</th>
         <th>Status</th>
         <th>Time</th>
+        <th>Water Used 💧</th>  
         <th>Reason</th>
       </tr>
     </thead>
@@ -919,6 +1004,12 @@ useEffect(() => {
             ? new Date(r.created_at).toLocaleString()
             : "—"}
         </td>
+        {/* Water Usage */}
+<td>
+  {r.duration_seconds
+    ? `${((r.duration_seconds / 60) * 2).toFixed(2)} L`
+    : "-"}
+</td>
 
         {/* Reason */}
         <td style={{ fontSize: "12px", color: "var(--muted)" }}>
