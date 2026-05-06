@@ -359,32 +359,46 @@ useEffect(() => {
   );
 }, []);
  
-  // ── Fetch zones (real-time) ──────────────────────────────────────────────
-  useEffect(() => {
-    const fetchZones = () => {
-      API.get("/zones")
-        .then((res) => {
-          const clean = res.data.map((z) => ({
-            zone:        Number(z.zone),
-            moisture:    Number(z.moisture),
-            temperature: Number(z.temperature || 0),
-          }));
-          setZones(clean);
- 
-          const avgM = clean.reduce((s, z) => s + z.moisture,    0) / clean.length;
-          const avgT = clean.reduce((s, z) => s + z.temperature, 0) / clean.length;
-          const now  = new Date().toLocaleTimeString();
- 
-          setHistoryData((prev) => ({
-            time:        [...prev.time.slice(-10),        now],
-            moisture:    [...prev.moisture.slice(-10),    avgM],
-            temperature: [...prev.temperature.slice(-10), avgT],
-          }));
-        })
-        .catch(console.error);
-    };
- 
-    useEffect(() => {
+ // ── Fetch zones (real-time) ──────────────────────────────────────────────
+useEffect(() => {
+  const fetchZones = () => {
+    API.get("/zones")
+      .then((res) => {
+        const clean = res.data.map((z) => ({
+          zone: Number(z.zone),
+          moisture: Number(z.moisture),
+          temperature: Number(z.temperature || 0),
+        }));
+
+        setZones(clean);
+
+        const avgM =
+          clean.reduce((s, z) => s + z.moisture, 0) / clean.length;
+
+        const avgT =
+          clean.reduce((s, z) => s + z.temperature, 0) / clean.length;
+
+        const now = new Date().toLocaleTimeString();
+
+        setHistoryData((prev) => ({
+          time: [...prev.time.slice(-10), now],
+          moisture: [...prev.moisture.slice(-10), avgM],
+          temperature: [...prev.temperature.slice(-10), avgT],
+        }));
+      })
+      .catch(console.error);
+  };
+
+  fetchZones();
+
+  const interval = setInterval(fetchZones, 3000);
+
+  return () => clearInterval(interval);
+}, []);
+
+
+// ── SSE REAL-TIME STREAM ──────────────────────────────────────────────
+useEffect(() => {
   const eventSource = new EventSource(
     "https://smart-irrigation-backend-wra6.onrender.com/api/stream"
   );
@@ -398,10 +412,8 @@ useEffect(() => {
       temperature: Number(z.temperature || 0),
     }));
 
-    // ✅ update zones (same as before)
     setZones(clean);
 
-    // ✅ KEEP YOUR CHART LOGIC
     const avgM =
       clean.reduce((s, z) => s + z.moisture, 0) / clean.length;
 
@@ -426,7 +438,6 @@ useEffect(() => {
     eventSource.close();
   };
 }, []);
-  }, []);
  
   // ── Fetch alerts ─────────────────────────────────────────────────────────
   useEffect(() => {
