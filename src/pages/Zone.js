@@ -23,6 +23,10 @@ export default function Zone() {
 
   // 🔥 GET CURRENT ZONE DATA FROM URL
   const zoneInfo = zonesData.find(z => z.zone === Number(id));
+  const isOffline =
+  !zoneInfo?.last_seen ||
+  (new Date() - new Date(zoneInfo.last_seen)) >
+    2 * 60 * 1000;
 
   return (
     <div className="min-h-screen bg-green-100 p-6">
@@ -109,6 +113,11 @@ export default function Zone() {
             <h2 className="text-xl font-bold mb-4">
               🌱 Zone {selectedZone}
             </h2>
+            {isOffline && (
+  <div className="bg-red-500 text-white px-3 py-2 rounded mb-4">
+    ⚠️ Sensor Offline
+  </div>
+)}
 
             {/* 💧 REAL DATA */}
             <p className="mb-2">
