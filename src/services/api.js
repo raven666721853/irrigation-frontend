@@ -1,8 +1,4 @@
-// ============================================================
-// FILE: frontend/src/services/api.js  (FULL REPLACEMENT)
-// WHAT: Adds JWT Authorization header to every request
-//       automatically, so Dashboard.jsx works with protected routes.
-// ============================================================
+// FILE: frontend/src/services/api.js
 
 import axios from "axios";
 
@@ -19,13 +15,18 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-// If 401, redirect to login
+// Only redirect to login on 401 if we're NOT already on login page
+// and only for auth-required routes (not weather, alerts, etc.)
 API.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
+      const currentPath = window.location.pathname;
+      // Don't redirect if already on login or register
+      if (currentPath !== "/login" && currentPath !== "/register") {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(err);
   }
