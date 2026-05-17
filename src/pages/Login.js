@@ -10,17 +10,28 @@ export default function Login({ setIsAuth }) {
 
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    API.post("/auth/login", { email, password })
-      .then((res) => {
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
+  const handleLogin = async () => {
+  try {
+    const res = await API.post("/auth/login", {
+      email,
+      password
+    });
 
-        setIsAuth(true); // 🔥 triggers app update
-        navigate("/");   // go to dashboard
-      })
-      .catch(() => setError("Invalid credentials"));
-  };
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("user", JSON.stringify(res.data.user));
+
+    setIsAuth(true);
+
+    navigate("/");
+
+  } catch (err) {
+    console.error(err);
+
+    setError(
+      err.response?.data?.message || "Login failed"
+    );
+  }
+};
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
