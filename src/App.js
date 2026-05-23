@@ -3,6 +3,7 @@ import { useState } from "react";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Admin from "./pages/Admin";
 
 function App() {
   const [isAuth, setIsAuth] = useState(!!localStorage.getItem("token"));
@@ -11,33 +12,44 @@ function App() {
     <Router>
       <Routes>
 
-        {/* 🔐 Protected */}
-        <Route
-          path="/"
-          element={
-            isAuth ? (
-              <Dashboard setIsAuth={setIsAuth} />
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
+  {/* 🔐 Protected */}
+  <Route
+    path="/"
+    element={
+      isAuth ? (
+        <Dashboard setIsAuth={setIsAuth} />
+      ) : (
+        <Navigate to="/login" />
+      )
+    }
+  />
 
-        {/* 🔓 Public */}
-        <Route
-          path="/login"
-          element={
-            !isAuth ? (
-              <Login setIsAuth={setIsAuth} />
-            ) : (
-              <Navigate to="/" />
-            )
-          }
-        />
+  {/* 🔓 Public */}
+  <Route
+    path="/login"
+    element={
+      !isAuth ? (
+        <Login setIsAuth={setIsAuth} />
+      ) : (
+        <Navigate to="/" />
+      )
+    }
+  />
 
-        <Route path="/register" element={<Register />} />
+  <Route path="/register" element={<Register />} />
 
-      </Routes>
+  <Route
+    path="/admin"
+    element={
+      isAuth ? (
+        <Admin />
+      ) : (
+        <Navigate to="/login" />
+      )
+    }
+  />
+
+</Routes>
     </Router>
   );
 }
