@@ -579,7 +579,7 @@ function AddZoneModal({ farmId, onClose, onSave }) {
 }
 
 // ─── Main Dashboard ───────────────────────────────────────────
-export default function Dashboard() {
+export default function Dashboard({ setIsAuth }) {
   const navigate = useNavigate();
 
   const [activeTab,     setActiveTab]     = useState("overview");
@@ -605,6 +605,7 @@ export default function Dashboard() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    if (setIsAuth) setIsAuth(false);
     navigate("/login");
   };
 
