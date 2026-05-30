@@ -32,7 +32,7 @@ function App() {
           element={
             !isAuth   ? <Navigate to="/login" /> :
             isUser    ? <Navigate to="/" /> :
-            <Admin />
+            <Admin setIsAuth={setIsAuth} />
           }
         />
 
