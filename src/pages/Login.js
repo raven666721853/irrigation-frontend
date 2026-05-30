@@ -22,7 +22,11 @@ export default function Login({ setIsAuth }) {
 
     setIsAuth(true);
 
-    navigate("/");
+    if (res.data.user?.role === "admin") {
+      navigate("/admin");
+    } else {
+      navigate("/");
+    }
 
   } catch (err) {
     console.error(err);
@@ -35,7 +39,8 @@ export default function Login({ setIsAuth }) {
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
-      navigate("/");
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      navigate(user.role === "admin" ? "/admin" : "/");
     }
   }, []);
 
