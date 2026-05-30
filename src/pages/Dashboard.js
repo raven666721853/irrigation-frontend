@@ -755,7 +755,6 @@ export default function Dashboard({ setIsAuth }) {
           )}
           <div className="irr-status-pill"><span className="irr-pulse" />Live · 3s</div>
           {currentUser?.name && <div className="irr-user-chip">👤 {currentUser.name}</div>}
-          <button className="irr-header-btn" onClick={() => navigate("/admin")}>Admin</button>
           <button className="irr-logout-btn" onClick={handleLogout}>Logout</button>
         </div>
       </div>
