@@ -8,48 +8,47 @@ import Admin from "./pages/Admin";
 function App() {
   const [isAuth, setIsAuth] = useState(!!localStorage.getItem("token"));
 
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const isAdmin = isAuth && user.role === "admin";
+  const isUser  = isAuth && user.role !== "admin";
+
   return (
     <Router>
       <Routes>
 
-  {/* 🔐 Protected */}
-  <Route
-    path="/"
-    element={
-      isAuth ? (
-        <Dashboard setIsAuth={setIsAuth} />
-      ) : (
-        <Navigate to="/login" />
-      )
-    }
-  />
+        {/* "/" — only regular users, admins get sent to /admin */}
+        <Route
+          path="/"
+          element={
+            !isAuth   ? <Navigate to="/login" /> :
+            isAdmin   ? <Navigate to="/admin" /> :
+            <Dashboard setIsAuth={setIsAuth} />
+          }
+        />
 
-  {/* 🔓 Public */}
-  <Route
-    path="/login"
-    element={
-      !isAuth ? (
-        <Login setIsAuth={setIsAuth} />
-      ) : (
-        <Navigate to="/" />
-      )
-    }
-  />
+        {/* "/admin" — only admins, regular users get sent to "/" */}
+        <Route
+          path="/admin"
+          element={
+            !isAuth   ? <Navigate to="/login" /> :
+            isUser    ? <Navigate to="/" /> :
+            <Admin />
+          }
+        />
 
-  <Route path="/register" element={<Register />} />
+        {/* Public */}
+        <Route
+          path="/login"
+          element={
+            isAdmin ? <Navigate to="/admin" /> :
+            isUser  ? <Navigate to="/" /> :
+            <Login setIsAuth={setIsAuth} />
+          }
+        />
 
-  <Route
-    path="/admin"
-    element={
-      isAuth ? (
-        <Admin />
-      ) : (
-        <Navigate to="/login" />
-      )
-    }
-  />
+        <Route path="/register" element={<Register />} />
 
-</Routes>
+      </Routes>
     </Router>
   );
 }
