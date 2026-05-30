@@ -11,7 +11,7 @@ const TABS = [
   { id: "alerts",    icon: "⚠",  label: "Alerts"       },
 ];
 
-export default function Admin() {
+export default function Admin({ setIsAuth }) {
   const navigate  = useNavigate();
   const [tab, setTab]         = useState("overview");
   const [stats, setStats]     = useState(null);
@@ -152,9 +152,10 @@ export default function Admin() {
             {me.name || me.email || "Admin"}
           </div>
           {loading && <div style={S.spinner}/>}
-          <button style={S.btnSecondary} onClick={() => navigate("/")}>← Dashboard</button>
           <button style={S.btnDanger} onClick={() => {
-            localStorage.clear(); navigate("/login");
+            localStorage.clear();
+            if (setIsAuth) setIsAuth(false);
+            navigate("/login");
           }}>Logout</button>
         </div>
       </div>
